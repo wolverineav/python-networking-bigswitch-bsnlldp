@@ -141,30 +141,41 @@ def daemonize():
         # Exit from the 2nd parent process
         os._exit(os.EX_OK)
 
+def get_hostname():
+    return socket.gethostname()
+
+def get_10g_devices():
+    # need to figure out how to grep for these from ifconfig for example
+    return ["eth0"]
+
 def main():
     args = parse_args()
 
     if args.daemonize:
         daemonize()
 
-    senders = []
-    frames = []
-    intfs = args.network_interface.split(',')
-    for intf in intfs:
-      interface = intf.strip()
-      frame = lldp_frame_of(chassis_id=CHASSIS_ID,
-                            network_interface=interface,
-                            ttl=TTL,
-                            system_name=args.system_name,
-                            system_desc=args.system_desc)
-      frames.append(frame)
+    def _generate_senders_frames():
+      senders = []
+      frames = []
+      intfs = get_10g_devices() #args.network_interface.split(',')
+      for intf in intfs:
+        interface = intf.strip()
+        frame = lldp_frame_of(chassis_id=CHASSIS_ID,
+                              network_interface=interface,
+                              ttl=TTL,
+                              system_name= get_hostname(), # args.system_name,
+                              system_desc=args.system_desc)
+        frames.append(frame)
 
-      # Send the frame
-      s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-      s.bind((interface, 0))
-      senders.append(s)
+        # Send the frame
+        s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
+        s.bind((interface, 0))
+        senders.append(s)
+      return senders, frames
+
 
     while True:
+        senders, frames = _generate_senders_frames()
         for idx, s in enumerate(senders):
             s.send(frames[idx])
         if not args.interval:

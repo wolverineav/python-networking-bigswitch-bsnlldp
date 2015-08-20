@@ -4,8 +4,7 @@ Description=bsn lldp
 After=syslog.target network.target
 [Service]
 Type=simple
-EnvironmentFile=-/etc/sysconfig/bsnlldp
-ExecStart=/bin/bsnlldp $DAEMON_ARGS
+ExecStart=/bin/bsnlldp --system-desc 5c:16:c7:00:00:00 -i 10
 Restart=always
 StartLimitInterval=60s
 StartLimitBurst=3
