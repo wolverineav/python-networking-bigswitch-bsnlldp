@@ -1,1 +1,0 @@
-DAEMON_ARGS="--system-desc 5c:16:c7:00:00:00 --system-name fully.qualified.domain.name -i 10 --network_interface bond_slave1,bond_slave2"
