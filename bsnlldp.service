@@ -1,0 +1,13 @@
+
+[Unit]
+Description=bsn lldp
+After=syslog.target network.target
+[Service]
+Type=simple
+EnvironmentFile=-/etc/sysconfig/bsnlldp
+ExecStart=/bin/bsnlldp $DAEMON_ARGS
+Restart=always
+StartLimitInterval=60s
+StartLimitBurst=3
+[Install]
+WantedBy=multi-user.target
