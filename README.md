@@ -1,1 +1,1 @@
-# python-networking-bigswitch-sendlldp
+# python-networking-bigswitch-bsnlldp
