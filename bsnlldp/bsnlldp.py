@@ -25,11 +25,14 @@ from ctypes import (
 )
 import ctypes.util
 import ctypes
+from subprocess import check_output
 
 LLDP_DST_MAC = "01:80:c2:00:00:0e"
+SYSTEM_DESC = "5c:16:c7:00:00:04"
 LLDP_ETHERTYPE = 0x88cc
 CHASSIS_ID = "Big Cloud Fabric"
 TTL = 120
+INTERVAL = 10
 
 CHASSIS_ID_LOCALLY_ASSIGNED = 7
 
@@ -244,7 +247,8 @@ def get_hostname():
 
 def get_phy_interfaces():
     intf_list = []
-    for ni in get_network_interfaces():
+    nics = get_network_interfaces()
+    for ni in nics:
         try:
             cmd_out = check_output("ethtool " + ni.name + " | grep 'Supported ports'", shell=True)
             if "[ ]" not in cmd_out:
@@ -264,14 +268,14 @@ def main():
     def _generate_senders_frames():
       senders = []
       frames = []
-      intfs = get_phy_interfaces() #args.network_interface.split(',')
+      intfs = get_phy_interfaces()
       for intf in intfs:
         interface = intf.strip()
         frame = lldp_frame_of(chassis_id=CHASSIS_ID,
                               network_interface=interface,
                               ttl=TTL,
-                              system_name= get_hostname(), # args.system_name,
-                              system_desc=args.system_desc)
+                              system_name=get_hostname(),
+                              system_desc=SYSTEM_DESC) 
         frames.append(frame)
 
         # Send the frame
@@ -285,9 +289,7 @@ def main():
         senders, frames = _generate_senders_frames()
         for idx, s in enumerate(senders):
             s.send(frames[idx])
-        if not args.interval:
-            break
-        time.sleep(args.interval)
+        time.sleep(INTERVAL)
 
 if __name__ == "__main__":
     main()
